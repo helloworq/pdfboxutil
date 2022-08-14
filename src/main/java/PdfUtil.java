@@ -261,4 +261,22 @@ public class PdfUtil {
         contentStream.showText(text);
         contentStream.endText();
     }
+
+    public static List<Integer> calculateRowHeightNew(List<List<String>> rowData, PDFont font, List<Integer> split, int po) {
+        AtomicInteger order = new AtomicInteger(1);
+        //计算结果基于已给定的cell宽度和字符尺寸
+        List<Integer> res = new LinkedList<>();
+        res.add(po);
+        for (int i = 0; i < rowData.size(); i++) {
+            int height = rowData.get(i).stream()
+                    .map(data -> (int) Math.ceil(PdfUtil.getStringWidth(data, font, GLOBAL_FONT_SIZE)
+                            / (split.get(order.getAndIncrement()) - GLOBAL_PADDING)))
+                    .max(Comparator.comparing(Integer::intValue))
+                    .map(data -> (DEFAULT_CELL_HEIGHT * (data - 1)) + (int) (GLOBAL_PADDING * 2))
+                    .get();
+            res.add(-height);
+            order.set(1);
+        }
+        return res;
+    }
 }
