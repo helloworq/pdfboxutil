@@ -48,7 +48,7 @@ public class PdfUtil {
 
         if (Objects.nonNull(colorRows)) {
             for (int row : colorRows) {
-                contentStream.setNonStrokingColor(244, 244, 244);//gray
+                contentStream.setNonStrokingColor(new Color(244, 244, 244));//gray
                 contentStream.addRect(
                         xWidthMin + STROKING_WIDTH
                         , ySplit.stream().limit(row).reduce(Integer::sum).get() + STROKING_WIDTH
@@ -60,7 +60,7 @@ public class PdfUtil {
 
         if (Objects.nonNull(colorColumns)) {
             for (int column : colorColumns) {
-                contentStream.setNonStrokingColor(244, 244, 244);//gray
+                contentStream.setNonStrokingColor(new Color(244, 244, 244));//gray
                 contentStream.addRect(
                         xSplit.stream().limit(column).reduce(Integer::sum).get() + STROKING_WIDTH
                         , yHeightMin + STROKING_WIDTH
@@ -107,7 +107,7 @@ public class PdfUtil {
                     List<String> res = fillColorTag(colorStringList);
                     for (String re : res) {
                         drawColorText(contentStream, re, xSplit.stream().limit(j).reduce(Integer::sum).get() + TABLE_TEXT_PADDING
-                                , ySplit.stream().limit(i).reduce(Integer::sum).get() - TABLE_TEXT_PADDING - newLineHeight * 20f
+                                , ySplit.stream().limit(i).reduce(Integer::sum).get() - 2 * TABLE_TEXT_PADDING - newLineHeight * 20f
                                 , font, GLOBAL_FONT_SIZE, color);
                         newLineHeight++;
                     }
@@ -232,10 +232,9 @@ public class PdfUtil {
     public static void darwLine(PDPageContentStream contentStream, float xStart, float yStart, float xEnd, float yEnd) {
         try {
             contentStream.moveTo(xStart, yStart);
-            contentStream.setStrokingColor(221, 221, 221);
+            contentStream.setStrokingColor(new Color(221, 221, 221));
             contentStream.lineTo(xEnd, yEnd);
             contentStream.stroke();
-            contentStream.setStrokingColor(0, 0, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -243,7 +242,7 @@ public class PdfUtil {
 
     public static void drawText(PDPageContentStream contentStream, String text, float x, float y, PDFont font, float fontSize) throws IOException {
         contentStream.beginText();
-        contentStream.setStrokingColor(85, 85, 85);
+        contentStream.setNonStrokingColor(new Color(85, 85, 85));
         contentStream.setFont(font, fontSize);
         //contentStream.setRenderingMode(RenderingMode.FILL);
         contentStream.setCharacterSpacing(0.6f);
@@ -254,19 +253,19 @@ public class PdfUtil {
 
     public static void drawText(PDPageContentStream contentStream, String text, float x, float y, PDFont font, float fontSize, boolean bold) throws IOException {
         contentStream.beginText();
-        contentStream.setStrokingColor(0, 0, 0);
+        contentStream.setNonStrokingColor(Color.BLACK);
         contentStream.setFont(font, fontSize);
-        contentStream.setRenderingMode(RenderingMode.STROKE);
+        contentStream.setRenderingMode(RenderingMode.FILL);
         contentStream.newLineAtOffset(x + TABLE_TEXT_PADDING, y + TABLE_TEXT_PADDING);
         contentStream.showText(text);
         contentStream.endText();
     }
 
-    public static List<Integer> calculateRowHeightNew(List<List<String>> rowData, PDFont font, List<Integer> split, int po) {
+    public static List<Integer> calculateRowHeight(int startY, List<List<String>> rowData, PDFont font, List<Integer> split) {
         AtomicInteger order = new AtomicInteger(1);
         //计算结果基于已给定的cell宽度和字符尺寸
         List<Integer> res = new LinkedList<>();
-        res.add(po);
+        res.add(startY);
         for (int i = 0; i < rowData.size(); i++) {
             int height = rowData.get(i).stream()
                     .map(data -> (int) Math.ceil(PdfUtil.getStringWidth(data, font, GLOBAL_FONT_SIZE)

@@ -50,7 +50,7 @@ public class Demo {
                         , tableWidthList
                         //calculate table height per row 计算每一行的行高
                         //the method is origin you can replace it ， 方法比较原始，你可以替换掉它
-                        , PdfUtil.calculateRowHeightNew(tableData, FONT, tableWidthList, GLOBAL_Y.intValue())
+                        , PdfUtil.calculateRowHeight(GLOBAL_Y.intValue(), tableData, FONT, tableWidthList)
                         , List.of(1)
                         , List.of(1)
                         , tableData
