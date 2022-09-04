@@ -1,17 +1,21 @@
-import org.apache.commons.lang3.StringUtils;
+package tool;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
+import util.Strings;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PdfUtil {
+    private static final String CHARS = "qwertyuioplkjhgfdsazxcvbnm1234567890";
     public static final String COLOR_TAG_START = "<cr>";
     public static final String COLOR_TAG_END = "</cr>";
     public static final Float STROKING_WIDTH = 1.0f;
@@ -38,7 +42,6 @@ public class PdfUtil {
             , List<Integer> xSplit, List<Integer> ySplit
             , List<Integer> colorRows, List<Integer> colorColumns
             , List<List<String>> rowData
-            , Color color
     ) throws IOException {
         Integer yHeightMin = ySplit.get(0);
         Integer yHeightMax = ySplit.stream().reduce(Integer::sum).get();
@@ -46,9 +49,9 @@ public class PdfUtil {
         Integer xWidthMin = xSplit.get(0);
         Integer xWidthMax = xSplit.stream().reduce(Integer::sum).get();
 
-        if (Objects.nonNull(colorRows)) {
+        if (!CollectionUtils.isEmpty(colorRows)) {
             for (int row : colorRows) {
-                contentStream.setNonStrokingColor(244, 244, 244);//gray
+                contentStream.setNonStrokingColor(new Color(244, 244, 244));//gray
                 contentStream.addRect(
                         xWidthMin + STROKING_WIDTH
                         , ySplit.stream().limit(row).reduce(Integer::sum).get() + STROKING_WIDTH
@@ -58,9 +61,9 @@ public class PdfUtil {
             }
         }
 
-        if (Objects.nonNull(colorColumns)) {
+        if (!CollectionUtils.isEmpty(colorColumns)) {
             for (int column : colorColumns) {
-                contentStream.setNonStrokingColor(244, 244, 244);//gray
+                contentStream.setNonStrokingColor(new Color(244, 244, 244));//gray
                 contentStream.addRect(
                         xSplit.stream().limit(column).reduce(Integer::sum).get() + STROKING_WIDTH
                         , yHeightMin + STROKING_WIDTH
@@ -86,7 +89,7 @@ public class PdfUtil {
         //drawText
         for (int i = 1; i < ySplit.size(); i++) {
             for (int j = 1; j < xSplit.size(); j++) {
-                if (Objects.nonNull(rowData)) {
+                if (!CollectionUtils.isEmpty(rowData)) {
                     int sum = 0;
                     int newLineHeight = 1;
                     String data = rowData.get(i - 1).get(j - 1);
@@ -107,8 +110,8 @@ public class PdfUtil {
                     List<String> res = fillColorTag(colorStringList);
                     for (String re : res) {
                         drawColorText(contentStream, re, xSplit.stream().limit(j).reduce(Integer::sum).get() + TABLE_TEXT_PADDING
-                                , ySplit.stream().limit(i).reduce(Integer::sum).get() - TABLE_TEXT_PADDING - newLineHeight * 20f
-                                , font, GLOBAL_FONT_SIZE, color);
+                                , ySplit.stream().limit(i).reduce(Integer::sum).get() - 2 * TABLE_TEXT_PADDING - newLineHeight * 20f
+                                , font, GLOBAL_FONT_SIZE, new Color(142, 142, 142));
                         newLineHeight++;
                     }
                 }
@@ -118,8 +121,8 @@ public class PdfUtil {
     }
 
     //根据已切分的带颜色标签的字符补全tag
-    private static List<String> fillColorTag(List<String> colorList) {
-        if (Objects.nonNull(colorList) && colorList.size() != 1) {
+    public static List<String> fillColorTag(List<String> colorList) {
+        if (!CollectionUtils.isEmpty(colorList) && colorList.size() != 1) {
             for (int i = 0; i < colorList.size() - 1; i++) {
                 String current = colorList.get(i);
                 if (!current.endsWith(COLOR_TAG_END)) {
@@ -154,23 +157,23 @@ public class PdfUtil {
         if (text.indexOf(COLOR_TAG_START, start) != -1) {
             while (text.indexOf(COLOR_TAG_START, start) != -1) {
                 int findPosition = text.indexOf(COLOR_TAG_START, start);
-                contentStream.setNonStrokingColor(NORMAL_TEXT_COLOR);
+                contentStream.setStrokingColor(NORMAL_TEXT_COLOR);
                 contentStream.showText(text.substring(start, findPosition));
 
                 start = findPosition + COLOR_TAG_START.length();
                 int end = text.indexOf(COLOR_TAG_END, start);
-                contentStream.setNonStrokingColor(color);
-                contentStream.showText(text.substring(start, end).replace(COLOR_TAG_START, StringUtils.EMPTY).replace(COLOR_TAG_END, StringUtils.EMPTY));
+                contentStream.setStrokingColor(color);
+                contentStream.showText(text.substring(start, end).replace(COLOR_TAG_START, Strings.EMPTY).replace(COLOR_TAG_END, Strings.EMPTY));
                 start = end + COLOR_TAG_END.length();
 
-                contentStream.setNonStrokingColor(NORMAL_TEXT_COLOR);
+                contentStream.setStrokingColor(NORMAL_TEXT_COLOR);
                 if (text.indexOf(COLOR_TAG_START, start) == -1) {
                     //contentStream.setCharacterSpacing(0.7f);
-                    contentStream.showText(text.substring(start).replace(COLOR_TAG_START, StringUtils.EMPTY).replace(COLOR_TAG_END, StringUtils.EMPTY));
+                    contentStream.showText(text.substring(start).replace(COLOR_TAG_START, Strings.EMPTY).replace(COLOR_TAG_END, Strings.EMPTY));
                 }
             }
         } else {
-            contentStream.setNonStrokingColor(NORMAL_TEXT_COLOR);
+            contentStream.setStrokingColor(NORMAL_TEXT_COLOR);
             contentStream.showText(text);
         }
 
@@ -180,9 +183,9 @@ public class PdfUtil {
     //从字符串指定位置开始获取限制长度的字符串
     public static int getSubStringNextPositionByWidth(int start, float limitWidth, String text, PDFont font, float fontSize) {
         AtomicInteger result = new AtomicInteger(start);
-        AtomicReference<String> total = new AtomicReference<>(StringUtils.EMPTY);
+        AtomicReference<String> total = new AtomicReference<>(Strings.EMPTY);
         AtomicInteger count = new AtomicInteger(0);
-        Arrays.stream(text.split(StringUtils.EMPTY)).skip(start).forEach(curChar -> {
+        Arrays.stream(text.split(Strings.EMPTY)).skip(start).forEach(curChar -> {
             if (count.get() > 0) {
                 count.decrementAndGet();
             } else {
@@ -207,66 +210,11 @@ public class PdfUtil {
         return result.get();
     }
 
-    public static int calculateRowHeight(List<List<String>> rowData, int index, PDFont font, List<Integer> split) {
-        AtomicInteger order = new AtomicInteger(1);
-        //计算结果基于已给定的cell宽度和字符尺寸
-        return rowData.get(index).stream()
-                .map(data -> (int) Math.ceil(PdfUtil.getStringWidth(data, font, GLOBAL_FONT_SIZE)
-                        / (split.get(order.getAndIncrement()) - GLOBAL_PADDING)))
-                .max(Comparator.comparing(Integer::intValue))
-                .map(data -> (DEFAULT_CELL_HEIGHT * (data - 1)) + (int) (GLOBAL_PADDING * 2))
-                .get();
-    }
-
-    public static float getStringWidth(String text, PDFont font, float fontSize) {
-        try {
-            text = text.replace(COLOR_TAG_START, StringUtils.EMPTY)
-                    .replace(COLOR_TAG_END, StringUtils.EMPTY);
-            return font.getStringWidth(text) / 1000 * fontSize;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public static void darwLine(PDPageContentStream contentStream, float xStart, float yStart, float xEnd, float yEnd) {
-        try {
-            contentStream.moveTo(xStart, yStart);
-            contentStream.setStrokingColor(221, 221, 221);
-            contentStream.lineTo(xEnd, yEnd);
-            contentStream.stroke();
-            contentStream.setStrokingColor(0, 0, 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void drawText(PDPageContentStream contentStream, String text, float x, float y, PDFont font, float fontSize) throws IOException {
-        contentStream.beginText();
-        contentStream.setStrokingColor(85, 85, 85);
-        contentStream.setFont(font, fontSize);
-        //contentStream.setRenderingMode(RenderingMode.FILL);
-        contentStream.setCharacterSpacing(0.6f);
-        contentStream.newLineAtOffset(x + TABLE_TEXT_PADDING, y + TABLE_TEXT_PADDING);
-        contentStream.showText(text);
-        contentStream.endText();
-    }
-
-    public static void drawText(PDPageContentStream contentStream, String text, float x, float y, PDFont font, float fontSize, boolean bold) throws IOException {
-        contentStream.beginText();
-        contentStream.setStrokingColor(0, 0, 0);
-        contentStream.setFont(font, fontSize);
-        contentStream.setRenderingMode(RenderingMode.STROKE);
-        contentStream.newLineAtOffset(x + TABLE_TEXT_PADDING, y + TABLE_TEXT_PADDING);
-        contentStream.showText(text);
-        contentStream.endText();
-    }
-
-    public static List<Integer> calculateRowHeightNew(List<List<String>> rowData, PDFont font, List<Integer> split, int po) {
+    public static List<Integer> calculateRowHeight(int startY, List<List<String>> rowData, PDFont font, List<Integer> split) {
         AtomicInteger order = new AtomicInteger(1);
         //计算结果基于已给定的cell宽度和字符尺寸
         List<Integer> res = new LinkedList<>();
-        res.add(po);
+        res.add(startY);
         for (int i = 0; i < rowData.size(); i++) {
             int height = rowData.get(i).stream()
                     .map(data -> (int) Math.ceil(PdfUtil.getStringWidth(data, font, GLOBAL_FONT_SIZE)
@@ -278,5 +226,54 @@ public class PdfUtil {
             order.set(1);
         }
         return res;
+    }
+
+    public static float getStringWidth(String text, PDFont font, float fontSize) {
+        try {
+            text = text.replace(COLOR_TAG_START, Strings.EMPTY)
+                    .replace(COLOR_TAG_END, Strings.EMPTY);
+            return font.getStringWidth(text) / 1000 * fontSize;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static void darwLine(PDPageContentStream contentStream, float xStart, float yStart, float xEnd, float yEnd) {
+        try {
+            contentStream.moveTo(xStart, yStart);
+            contentStream.setStrokingColor(new Color(221, 221, 221));
+            contentStream.lineTo(xEnd, yEnd);
+            contentStream.stroke();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void drawText(PDPageContentStream contentStream, String text, float x, float y, PDFont font, float fontSize) throws IOException {
+        contentStream.beginText();
+        contentStream.setStrokingColor(new Color(85, 85, 85));
+        contentStream.setFont(font, fontSize);
+        //contentStream.setRenderingMode(RenderingMode.FILL);
+        contentStream.setCharacterSpacing(0.6f);
+        contentStream.newLineAtOffset(x + TABLE_TEXT_PADDING, y + TABLE_TEXT_PADDING);
+        contentStream.showText(text);
+        contentStream.endText();
+    }
+
+    public static void drawText(PDPageContentStream contentStream, String text, float x, float y, PDFont font, float fontSize, boolean bold) throws IOException {
+        contentStream.beginText();
+        contentStream.setStrokingColor(Color.BLACK);
+        contentStream.setFont(font, fontSize);
+        contentStream.setRenderingMode(RenderingMode.FILL_STROKE);
+        contentStream.newLineAtOffset(x + TABLE_TEXT_PADDING, y + TABLE_TEXT_PADDING);
+        contentStream.showText(text);
+        contentStream.endText();
+        contentStream.setRenderingMode(RenderingMode.STROKE);
+    }
+
+
+    public static <T> List<T> listOf(T... t) {
+        return new ArrayList<>(Arrays.asList(t));
     }
 }
