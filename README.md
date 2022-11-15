@@ -19,6 +19,9 @@ new method pdfBuilder is created! you can use it to create your own pdf!
 
 # 这是为pdfbox写的一个小工具
 
+## feature 5:
+新增了pdfBuilder方法，你可以用它创建pdf了！
+
 ## feature 1 :
 你可以用它绘制带颜色的字符串，不管这个tag标签在哪里都可以
 
@@ -31,10 +34,12 @@ new method pdfBuilder is created! you can use it to create your own pdf!
 ## feature 4:
 项目里有几个简单的demo
 
-## feature 5:
-新增了pdfBuilder方法，你可以用它创建pdf了！
-
 # example
+
+## pdfBuilder !!!
+![img/pdfBuilder-code.png](img/pdfBuilder-code.png)
+![img/pdfBuilder.png](img/pdfBuilder.png)
+
 ## color text
 ![img/colortext-code.png](img/colortext-code.png)
 ![img/colortext.png](img/colortext.png)
@@ -42,10 +47,6 @@ new method pdfBuilder is created! you can use it to create your own pdf!
 ## create your own pdf
 ![img/table-code.png](img/table-code.png)
 ![img/table.png](img/table.png)
-
-## pdfBuilder
-![img/pdfBuilder-code.png](img/pdfBuilder-code.png)
-![img/pdfBuilder.png](img/pdfBuilder.png)
 
 
 
