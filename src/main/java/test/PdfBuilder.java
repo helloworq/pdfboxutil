@@ -145,10 +145,10 @@ public class PdfBuilder {
     /**
      * 更强的table
      *
-     * @param widths
-     * @param data
-     * @param colorRows
-     * @param colorColumns
+     * @param widths       指定table宽度，每一列都需要指定，行高不需要指定，会自适应
+     * @param data         需要渲染的数据
+     * @param colorRows    需要着色的行
+     * @param colorColumns 需要着色的列
      * @return
      * @throws IOException
      */
