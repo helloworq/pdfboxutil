@@ -1,6 +1,6 @@
 import cn.hutool.core.util.StrUtil;
-import tool.PdfBuilder;
-import tool.PdfUtil;
+import test.PdfBuilder;
+import test.PdfUtil;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ public class Demo {
     static String title = "pdfboxutil is a good util for pdfbox lib";
     static List<List<String>> tableData = Arrays.asList(
             Arrays.asList("", "COMPANY", "EMAIL", "TEL", "CONTACT"),
-            Arrays.asList("FIRST", "<cr>AMAZON</cr>", "123@MAIL", "123", "123"),
+            Arrays.asList("FIRST", color("亚马逊"), "123@MAIL", "123", "123"),
             Arrays.asList("SECOND", "MICROSOFT", "123@MAIL", "123", "123"),
             Arrays.asList("SECOND", "MICROSOFT", "123@MAIL", "123", "123"),
             Arrays.asList("SECOND", "MICROSOFT", "123@MAIL", "123", "123"),
@@ -55,14 +55,21 @@ public class Demo {
             Arrays.asList("SECOND", "MICROSOFT", "123@MAIL", "123", "123"),
             Arrays.asList("SECOND", "MICROSOFT", "123@MAIL", "123", "123"),
             Arrays.asList("SECOND", "MICROSOFT", "123@MAIL", "123", "123"),
-            Arrays.asList("THIRD", "APPLE", "123@MAIL", "<cr>123</cr>", "123")
+            Arrays.asList("THIRD", "APPLE", "123@MAIL", color("123"), "123")
     );
 
+    /**
+     * 直接执行，开箱即用
+     *
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         PdfBuilder.builder()
                 .row().moveX(150f).title(title)
                 .row().blueText(color("Name:  ")).moveX(50f).line(0f, -5f, 340f, -5f).blueText("Bob")
-                .row().powerTable(PdfUtil.listOf(100, 100, 100, 100, 100), tableData, List.of(0), List.of(0))
+                .row().blueText(color("名字:  ")).moveX(50f).line(0f, -5f, 340f, -5f).blueText("鲍勃")
+                .row().powerTable(PdfUtil.listOf(150, 150, 150, 150, 150), tableData, List.of(0), List.of(0))
                 .create();
     }
 
